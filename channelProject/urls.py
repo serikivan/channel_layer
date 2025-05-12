@@ -17,7 +17,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('processSegment/', views.process_segment, name='process_segment'),
-    path('processAck/', views.process_ack, name='process_ack'),
+    path('processSegment', views.process_segment, name='process_segment'),
+    path('processAck', views.process_ack, name='process_ack'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
