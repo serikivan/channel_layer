@@ -1,12 +1,14 @@
-# channel/utils.py
+# channel/utils.py - вычислительные функции для удобства вынесены в отдельный файл
 
 import random
 
-GENERATOR_POLY = "1011"  # Порождающий полином для (7,4)-кода
-
+#SEGMENT_PROCESS_TIME = 2 # Время сборки сегмента
 SEGMENT_SIZE = 120  # 120 байт
 ERROR_PROBABILITY = 0.10  # 10% ошибка
 LOSS_PROBABILITY = 0.015  # 1.5% потеря
+#LOSS_PROBABILITY = 1  # 100% потеря для отладки
+
+GENERATOR_POLY = "1011"  # Порождающий полином для (7,4)-кода
 
 
 def xor(a, b):
@@ -32,9 +34,6 @@ def modulo2_division(dividend, divisor):
 
 
 def encode_bitstring(bitstring):
-    if len(bitstring) != 4:
-        raise ValueError("Input bitstring must be exactly 4 bits long")
-
     # Добавляем 3 нуля (n-k = 3)
     extended = bitstring + '000'
     remainder = modulo2_division(extended, GENERATOR_POLY)
@@ -44,15 +43,12 @@ def encode_bitstring(bitstring):
 
 
 def decode_bitstring(codeword):
-    if len(codeword) != 7:
-        raise ValueError("Codeword must be exactly 7 bits long")
-
     syndrome = modulo2_division(codeword, GENERATOR_POLY)[-3:]  # Берем последние 3 бита
 
     if syndrome == '000':
         return codeword[:4]  # Ошибок нет
 
-    print(f"Decoding: {codeword}, syndrome: {syndrome}")
+    print(f"Декодирование слова {codeword}, синдром: {syndrome}")
 
     # Таблица синдромов для (7,4) кода
     error_positions = {
@@ -71,30 +67,23 @@ def decode_bitstring(codeword):
         corrected = codeword[:pos] + ('1' if codeword[pos] == '0' else '0') + codeword[pos + 1:]
         return corrected[:4]
 
-    # Возвращаем исходные биты
+    # Возвращаем codeword
     return codeword[:4]
 
 
 def bits_to_text(bits):
-    # Разбиваем биты на байты (по 8 бит)
+    # Дополняем до полной кратности 8
+    if len(bits) % 8 != 0:
+        bits += '0' * (8 - len(bits) % 8)
+
     byte_strings = [bits[i:i + 8] for i in range(0, len(bits), 8)]
+    byte_list = [int(b, 2) for b in byte_strings]
 
-    # Фильтруем неполные байты в конце
-    byte_strings = [b for b in byte_strings if len(b) == 8]
-
-    # Конвертируем в байты
-    byte_list = []
-    for byte_str in byte_strings:
-        try:
-            byte_list.append(int(byte_str, 2))
-        except ValueError:
-            continue
-
-    # Декодируем с обработкой ошибок
     try:
         return bytes(byte_list).decode('utf-8', errors='replace')
     except:
         return "[DECODING ERROR]"
+
 
 
 def text_to_bits(text):

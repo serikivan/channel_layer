@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# Адрес сервера передачи сегментов и ACK
+TRANSFER_ACK_URL = "http://192.168.164.159:4000/transferAck" # ACK на Землю - IP Земли
+TRANSFER_SEGMENT_URL = "http://192.168.164.21:4000/transferSegment" # Сегменты на МАРС - IP МАРСА
+
 # Application definition
 
 INSTALLED_APPS = [
